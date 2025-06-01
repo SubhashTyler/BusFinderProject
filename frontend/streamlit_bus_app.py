@@ -4,6 +4,15 @@ import pandas as pd
 
 API_BASE_URL = "https://busfinderproject-1.onrender.com"
 
+def safe_json_response(response):
+    try:
+        if "application/json" in response.headers.get("Content-Type", ""):
+            return response.json()
+        else:
+            return {"detail": response.text}
+    except Exception:
+        return {"detail": response.text or "Unknown error"}
+
 def register(username, password):
     response = requests.post(f"{API_BASE_URL}/register", json={"username": username, "password": password})
     return response
@@ -15,14 +24,14 @@ def login(username, password):
 def get_routes():
     response = requests.get(f"{API_BASE_URL}/routes")
     if response.ok:
-        return response.json()
+        return safe_json_response(response)
     return []
 
 def search_buses(from_city, to_city):
     params = {"from_city": from_city, "to_city": to_city}
     response = requests.get(f"{API_BASE_URL}/search", params=params)
     if response.ok:
-        return response.json()
+        return safe_json_response(response)
     return []
 
 def add_booking(username, from_city, to_city, bus, date):
@@ -39,7 +48,7 @@ def add_booking(username, from_city, to_city, bus, date):
 def get_bookings(username):
     response = requests.get(f"{API_BASE_URL}/bookings/{username}")
     if response.ok:
-        return response.json()
+        return safe_json_response(response)
     return []
 
 def delete_booking(booking_id):
@@ -65,15 +74,8 @@ if not st.session_state.logged_in:
             if res.ok:
                 st.success("Registration successful! Please login.")
             else:
-                try:
-    error_detail = res.json().get('detail', 'Unknown error')
-except ValueError:
-    # JSON decoding failed, fallback to text or generic error
-    error_detail = res.text if res.text else 'Unknown error'
-
-st.error(f"Error: {error_detail}")
-
-                #st.error(f"Error: {res.json().get('detail', 'Unknown error')}")
+                error_detail = safe_json_response(res).get('detail', 'Unknown error')
+                st.error(f"Error: {error_detail}")
         else:
             res = login(username, password)
             if res.ok:
@@ -81,7 +83,8 @@ st.error(f"Error: {error_detail}")
                 st.session_state.username = username
                 st.success(f"Welcome, {username}!")
             else:
-                st.error(f"Error: {res.json().get('detail', 'Login failed')}")
+                error_detail = safe_json_response(res).get('detail', 'Login failed')
+                st.error(f"Error: {error_detail}")
 
 else:
     st.sidebar.title(f"Hello, {st.session_state.username}!")
@@ -107,7 +110,8 @@ else:
                     if res.ok:
                         st.success("Booking Confirmed!")
                     else:
-                        st.error("Booking Failed!")
+                        error_detail = safe_json_response(res).get('detail', 'Booking failed')
+                        st.error(f"Booking Failed! Error: {error_detail}")
             else:
                 st.info("No buses found for this route.")
 
@@ -123,7 +127,8 @@ else:
                         st.success("Booking cancelled.")
                         st.experimental_rerun()
                     else:
-                        st.error("Failed to cancel booking.")
+                        error_detail = safe_json_response(res).get('detail', 'Cancellation failed')
+                        st.error(f"Failed to cancel booking. Error: {error_detail}")
         else:
             st.info("No bookings found.")
 
