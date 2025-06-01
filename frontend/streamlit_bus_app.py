@@ -5,22 +5,22 @@ import pandas as pd
 API_BASE_URL = "https://busfinderproject-1.onrender.com"
 
 def register(username, password):
-    response = requests.post(f"{API_URL}/register", json={"username": username, "password": password})
+    response = requests.post(f"{API_BASE_URL}/register", json={"username": username, "password": password})
     return response
 
 def login(username, password):
-    response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
+    response = requests.post(f"{API_BASE_URL}/login", json={"username": username, "password": password})
     return response
 
 def get_routes():
-    response = requests.get(f"{API_URL}/routes")
+    response = requests.get(f"{API_BASE_URL}/routes")
     if response.ok:
         return response.json()
     return []
 
 def search_buses(from_city, to_city):
     params = {"from_city": from_city, "to_city": to_city}
-    response = requests.get(f"{API_URL}/search", params=params)
+    response = requests.get(f"{API_BASE_URL}/search", params=params)
     if response.ok:
         return response.json()
     return []
@@ -33,17 +33,17 @@ def add_booking(username, from_city, to_city, bus, date):
         "bus": bus,
         "date": date
     }
-    response = requests.post(f"{API_URL}/bookings", json=payload)
+    response = requests.post(f"{API_BASE_URL}/bookings", json=payload)
     return response
 
 def get_bookings(username):
-    response = requests.get(f"{API_URL}/bookings/{username}")
+    response = requests.get(f"{API_BASE_URL}/bookings/{username}")
     if response.ok:
         return response.json()
     return []
 
 def delete_booking(booking_id):
-    response = requests.delete(f"{API_URL}/bookings/{booking_id}")
+    response = requests.delete(f"{API_BASE_URL}/bookings/{booking_id}")
     return response
 
 st.title("🚌 Indian Bus Finder App")
