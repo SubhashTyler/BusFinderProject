@@ -65,7 +65,15 @@ if not st.session_state.logged_in:
             if res.ok:
                 st.success("Registration successful! Please login.")
             else:
-                st.error(f"Error: {res.json().get('detail', 'Unknown error')}")
+                try:
+    error_detail = res.json().get('detail', 'Unknown error')
+except ValueError:
+    # JSON decoding failed, fallback to text or generic error
+    error_detail = res.text if res.text else 'Unknown error'
+
+st.error(f"Error: {error_detail}")
+
+                #st.error(f"Error: {res.json().get('detail', 'Unknown error')}")
         else:
             res = login(username, password)
             if res.ok:
