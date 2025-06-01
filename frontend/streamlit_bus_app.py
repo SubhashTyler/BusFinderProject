@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 
-API_URL = "http://localhost:8000"
+API_BASE_URL = https://busfinderproject-1.onrender.com
 
 def register(username, password):
     response = requests.post(f"{API_URL}/register", json={"username": username, "password": password})
